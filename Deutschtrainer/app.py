@@ -1336,7 +1336,7 @@ the bridge, die Brücke
 the building, das Gebäude
 the buildings, die Gebäude
 the sign, das Schild
-the signs, das Schilder
+the signs, die Schilder
 the parking lot, der Parkplatz
 the traffic, der Verkehr
 the traffic jam, der Stau
@@ -1739,7 +1739,7 @@ the path, der Weg
 the bridge, die Brücke
 the hill, der Hügel
 the mountain, der Berg
-the mountains, der Berge
+the mountains, die Berge
 the hut, die Hütte
 the valley, das Tal
 the stream, der Bach
