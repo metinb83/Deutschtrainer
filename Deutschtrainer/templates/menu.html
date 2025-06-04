@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Deutsch-Trainer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding-top: 2em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 { margin: 0; }
+    p.author {
+      font-size: 0.8rem;
+      margin: 0.2em 0 1em;
+    }
+    .frame {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 1em;
+      margin: 0.5em 0;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      width: 400px;
+      text-align: center;
+    }
+    .frame a {
+      text-decoration: none;
+      font-size: 1.2rem;
+      color: inherit;
+    }
+    .frame:hover {
+      background-color: #f9f9f9;
+    }
+    .menu-separator {
+      width: 420px;
+      max-width: 95%;
+      border: 0;
+      border-top: 2px dashed #666;
+      margin: 0.67em auto;
+    }
+        .section-title {
+      font-size: 1.25rem;
+      color: #444;
+      margin: 1.5em 0 0.5em;
+      text-align: center;
+    }
+    .section-divider {
+      border: none;
+      border-top: 2px solid #ccc;
+      margin: 0 0 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Deutsch-Trainer A1 / A2</h1>
+  <p class="author">von Metin Bektas (metinbektas83@gmail.com)</p>
+
+  <h2 class="section-title">——— Gemischte Übungen ———</h2>
+  <hr class="section-divider">
+
+  <div class="frame">
+    <a href="{{ url_for('artikelregeln') }}">Artikelregeln</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('gegenteile_verben') }}">Gegenteile (Verben)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('gegenteile_adjektive') }}">Gegenteile (Adjektive)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('steigerung') }}">Komparativ (Adjektive)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('super') }}">Superlativ (Adjektive)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('fragen') }}">Fragewörter</a>
+  </div>
+
+  <h2 class="section-title">——— Übungen zu Verben ———</h2>
+  <hr class="section-divider">
+
+  <div class="frame">
+    <a href="{{ url_for('sein') }}">Konjugation (sein)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('haben') }}">Konjugation (haben)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('konjugation') }}">Konjugation (Regelmäßige Verben)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('konjugation2') }}">Konjugation (Nicht-Regelmäßige Verben)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('modalverben') }}">Modalverben (können, müssen, dürfen)</a>
+  </div>  
+
+  <div class="frame">
+    <a href="{{ url_for('trennbare_verben') }}">Trennbare Verben</a>
+  </div>
+
+  <h2 class="section-title">——— Übungen zu Fällen ———</h2>
+  <hr class="section-divider">
+
+  <div class="frame">
+    <a href="{{ url_for('personalpronomen') }}">Personalpronomen 3. Person Singular</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('verbenfall') }}">Verben, Präpositionen und Fälle</a>
+  </div>
+
+  <h2 class="section-title">——— Übungen zur Vergangenheit ———</h2>
+  <hr class="section-divider">
+
+  <div class="frame">
+    <a href="{{ url_for('waren') }}">Präteritum (sein)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('hatten') }}">Präteritum (haben)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('perfekt') }}">Das Perfekt</a>
+  </div>
+
+  <h2 class="section-title">——— Übungen zum Wortschatz ———</h2>
+  <hr class="section-divider">
+
+  <div class="frame">
+    <a href="{{ url_for('temporal') }}">Temporale Adverbien (EN ⟷ DE)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('lokal') }}">Lokale Adverbien (EN ⟷ DE)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('otheradv') }}">Andere Adverbien (EN ⟷ DE)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('nomenpers') }}">Thema: Persönliche Daten (EN ⟷ DE)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('nomenablauf') }}">Thema: Typischer Tag (EN ⟷ DE)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('nomenhaushalt') }}">Thema: Wohnen (EN ⟷ DE)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('nomenstadt') }}">Thema: Stadt & Verkehr (EN ⟷ DE)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('nomenarbeit') }}">Thema: Büroarbeit (EN ⟷ DE)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('nomengesund') }}">Thema: Hygiene & Gesundheit (EN ⟷ DE)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('nomennatur') }}">Thema: Wetter & Natur (EN ⟷ DE)</a>
+  </div>
+
+  <div class="frame">
+    <a href="{{ url_for('nomengolf') }}">Thema: Golfspiel (EN ⟷ DE)</a>
+  </div>
+
+  <h2 class="section-title">——— Deutsche Sprache Meta ———</h2>
+  <hr class="section-divider">
+
+  <div class="frame">
+    <a href="{{ url_for('rechner') }}">Rechner für Lerndauer</a>
+  </div>
+
+  <div class="frame" style="border-color: transparent; box-shadow: none;">&nbsp;</div>
+
+</body>
+</html>

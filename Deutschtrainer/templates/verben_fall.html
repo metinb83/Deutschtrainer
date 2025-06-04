@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Verben und Fall</title>
+  <style>
+    body {
+      padding-top: 2em;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .frame {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 1em;
+      margin: 1em 0;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      width: 550px;
+      max-width: 90%;
+      text-align: center;
+    }
+    .quiz-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1em;
+    }
+    #prompt {
+      font-size: 1.33rem;
+      font-weight: normal;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 0.5em;
+      margin-top: 0.5em;
+    }
+    .button-container button {
+      height: 2.5em;
+      padding: 0 1em;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .button-container button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    /* Extra object styling matches prompt */
+    #extra-object {
+      font-size: 1.33rem;
+      font-weight: normal;
+      display: none;
+      margin-top: 0.5em;
+    }
+    .feedback-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5em;
+    }
+    #result {
+      font-size: 1.2rem;
+      font-weight: bold;
+      min-height: 1.5em;
+    }
+    #result.correct { color: green; }
+    #result.incorrect { color: red; }
+    .solution { color: green; font-weight: bold; }
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      font-size: 1rem;
+    }
+    .back-button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      font-size: 1rem;
+      cursor: pointer;
+      border: 1px solid #888;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+      text-decoration: none;
+      color: #000;
+      display: inline-block;
+    }
+    .back-button:hover { background-color: #e0e0e0; }
+    .instruction {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5em;
+      max-width: 550px;
+      text-align: center;
+    }
+  </style>
+  <script id="case-data" type="application/json">{{ pairs|tojson }}</script>
+</head>
+<body>
+  <p class="instruction">
+    Wählen Sie die korrekte Ergänzung.<br>
+  </p>
+  <!-- Quiz Section -->
+  <div class="frame quiz-section">
+    <div id="prompt"></div>
+    <div class="button-container">
+      <button id="option1">Option 1</button>
+      <button id="option2">Option 2</button>
+      <button id="continue" disabled>Weiter</button>
+    </div>
+    <div id="extra-object"></div>
+  </div>
+  <!-- Feedback Section -->
+  <div class="frame feedback-section">
+    <div id="result"></div>
+    <div class="stats">
+      <div>Richtig: <span id="correct">0</span></div>
+      <div>Versuche: <span id="total">0</span></div>
+      <div>Quote: <span id="percent">0%</span></div>
+    </div>
+    <a href="{{ url_for('home') }}" class="back-button">Zurück zum Menü</a>
+  </div>
+  <script>
+    const casePairs = JSON.parse(document.getElementById('case-data').textContent);
+    const allOptions = [
+      {a: 'dich', b: 'dir'},
+      {a: 'den Mann', b: 'dem Mann'},
+      {a: 'das Kind', b: 'dem Kind'},
+      {a: 'die Frau', b: 'der Frau'},
+      {a: 'einen Mann', b: 'einem Mann'},
+      {a: 'ein Kind', b: 'einem Kind'},
+      {a: 'eine Frau', b: 'einer Frau'}
+    ];
+    const excludeEinFor = [
+      'Ich brauche','Ich kenne','Ich verstehe','Ich liebe','Ich mag',
+      'Ich glaube','Ich antworte','Ich schicke','Ich empfehle','Das Buch gefällt'
+    ];
+    const showDasBuch = [
+      'Ich gebe','Ich zeige','Ich bringe','Ich schicke','Ich empfehle'
+    ];
+    const showDieGeschichte = ['Ich erzähle'];
+    let correct = 0, total = 0, current = {};
+    const promptEl = document.getElementById('prompt');
+    const opt1Btn = document.getElementById('option1');
+    const opt2Btn = document.getElementById('option2');
+    const continueBtn = document.getElementById('continue');
+    const resultEl = document.getElementById('result');
+    const correctEl = document.getElementById('correct');
+    const totalEl = document.getElementById('total');
+    const percentEl = document.getElementById('percent');
+    const extraEl = document.getElementById('extra-object');
+
+    function nextCase() {
+      const idx = Math.floor(Math.random() * casePairs.length);
+      current = casePairs[idx];
+      const phraseKey = current.phrase.replace(/\.$/, '');
+      // Filter options
+      let options = allOptions.filter(pair => {
+        if (['einen Mann','ein Kind','eine Frau'].includes(pair.a)) {
+          return !excludeEinFor.includes(phraseKey);
+        }
+        return true;
+      });
+      const pair = options[Math.floor(Math.random() * options.length)];
+      current.correctOption = (current.case === 'akk') ? pair.a : pair.b;
+      opt1Btn.textContent = pair.a;
+      opt2Btn.textContent = pair.b;
+      promptEl.textContent = phraseKey;
+      opt1Btn.disabled = false;
+      opt2Btn.disabled = false;
+      continueBtn.disabled = true;
+      resultEl.textContent = '';
+      resultEl.className = '';
+      if (showDieGeschichte.includes(phraseKey)) {
+        extraEl.textContent = 'die Geschichte';
+        extraEl.style.display = 'block';
+      } else if (showDasBuch.includes(phraseKey)) {
+        extraEl.textContent = 'das Buch';
+        extraEl.style.display = 'block';
+      } else {
+        extraEl.style.display = 'none';
+      }
+    }
+
+    function handleAnswer(choice) {
+      total++;
+      const isRight = (choice === current.correctOption);
+      if (isRight) {
+        resultEl.textContent = 'RICHTIG';
+        resultEl.className = 'correct';
+        correct++;
+      } else {
+        resultEl.innerHTML = 'FALSCH <span class="solution">(RICHTIG: ' + current.correctOption + ')</span>';
+        resultEl.className = 'incorrect';
+      }
+      correctEl.textContent = correct;
+      totalEl.textContent = total;
+      percentEl.textContent = Math.round((correct/total) * 100) + '%';
+      opt1Btn.disabled = true;
+      opt2Btn.disabled = true;
+      continueBtn.disabled = false;
+    }
+
+    opt1Btn.onclick = () => handleAnswer(opt1Btn.textContent);
+    opt2Btn.onclick = () => handleAnswer(opt2Btn.textContent);
+    continueBtn.onclick = nextCase;
+    window.onload = nextCase;
+  </script>
+</body>
+</html>

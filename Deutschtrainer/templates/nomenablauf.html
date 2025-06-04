@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Nomen Ablauf – Flashcard</title>
+  <style>
+    body {
+      padding-top: 2em;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .frame {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 1em;
+      margin: 1em 0;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      width: 550px;
+      max-width: 90%;
+      text-align: center;
+    }
+    .toggle-section {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      font-size: 1rem;
+    }
+    .flashcard-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5em;
+    }
+    #prompt {
+      font-size: 1.67rem;
+      color: #003366;
+      line-height: 1.4;
+      min-height: 2em;
+    }
+    #translation {
+      font-size: 1.67rem;
+      color: #007700;
+      min-height: 2em;
+      visibility: hidden;
+    }
+    hr.separator {
+      width: 80%;
+      border: none;
+      border-top: 1px solid #ccc;
+      margin: 0.25em 0;
+    }
+    .centered-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 1.5em;
+      width: 100%;
+    }
+    .button-container {
+      display: flex;
+      gap: 1em;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin-top: 1em;
+    }
+    button {
+      height: 2.5em;
+      padding: 0 1em;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .back-button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      font-size: 1rem;
+      cursor: pointer;
+      border: 1px solid #888;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+      text-decoration: none;
+      color: #000;
+      display: inline-block;
+    }
+    .back-button:hover { background-color: #e0e0e0; }
+    .instruction {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5em;
+      max-width: 550px;
+      text-align: center;
+    }
+  </style>
+  <script id="pairs-data" type="application/json">{{ pairs|tojson }}</script>
+</head>
+<body>
+  <p class="instruction">
+    Testen Sie die Kenntnisse dieser Wörter.<br>
+    Sie können Enter für OK und Weiter nutzen.
+  </p>
+  <div class="frame toggle-section">
+    <label><input type="radio" name="direction" value="en-de" checked> EN → DE</label>
+    <label><input type="radio" name="direction" value="de-en"> DE → EN</label>
+  </div>
+  <div class="frame flashcard-section">
+    <div id="prompt" class="centered-box"></div>
+    <hr class="separator">
+    <div id="translation" class="centered-box"></div>
+    <hr class="separator">
+    <div class="button-container">
+      <button id="show">Zeigen</button>
+      <button id="next" disabled>Weiter</button>
+    </div>
+  </div>
+  <a href="{{ url_for('home') }}" class="back-button">Zurück zum Menü</a>
+
+  <script>
+    const pairs = JSON.parse(document.getElementById('pairs-data').textContent);
+    let current = {};
+
+    const promptEl = document.getElementById('prompt');
+    const translationEl = document.getElementById('translation');
+    const showBtn = document.getElementById('show');
+    const nextBtn = document.getElementById('next');
+    const directionRadios = document.querySelectorAll('input[name="direction"]');
+
+    // Funktion, um das Prompt-Wort und die Übersetzung je nach Richtung zu setzen
+    function updatePrompt() {
+      const dir = document.querySelector('input[name="direction"]:checked').value;
+      if (dir === 'en-de') {
+        promptEl.textContent = current.en;
+        translationEl.textContent = current.de;
+      } else {
+        promptEl.textContent = current.de;
+        translationEl.textContent = current.en;
+      }
+      // Übersetzung verbergen und Buttons zurücksetzen
+      translationEl.style.visibility = 'hidden';
+      showBtn.disabled = false;
+      nextBtn.disabled = true;
+    }
+
+    // Zufälliges Wort-Paar laden
+    function nextPair() {
+      const idx = Math.floor(Math.random() * pairs.length);
+      current = pairs[idx];
+      updatePrompt();
+    }
+
+    // "Zeigen"-Button: Übersetzung sichtbar machen
+    showBtn.onclick = () => {
+      translationEl.style.visibility = 'visible';
+      showBtn.disabled = true;
+      nextBtn.disabled = false;
+      // Fokus auf Weiter‐Button versetzen, damit Enter dort ebenfalls funktioniert
+      nextBtn.focus();
+    };
+
+    // "Weiter"-Button: Nächstes Wort
+    nextBtn.onclick = nextPair;
+
+    // Wenn die Richtung geändert wird, neu rendern
+    directionRadios.forEach(radio => {
+      radio.addEventListener('change', updatePrompt);
+    });
+
+    // Enter‐Taste global abfangen:
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        // Wenn der "Zeigen"-Button aktiv ist, drücke ihn; sonst den "Weiter"-Button
+        if (!showBtn.disabled) {
+          showBtn.click();
+        } else if (!nextBtn.disabled) {
+          nextBtn.click();
+        }
+      }
+    });
+
+    // Beim Laden direkt das erste Paar anzeigen
+    window.onload = nextPair;
+  </script>
+</body>
+</html>

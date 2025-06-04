@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Artikelregeln</title>
+  <style>
+    body {
+      padding-top: 2em;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .frame {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 1em;
+      margin: 1em 0;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      width: 550px;
+      max-width: 90%;
+      text-align: center;
+    }
+    .quiz-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1em;
+    }
+    #noun {
+      font-size: 1.5rem;
+      font-weight: normal;
+      text-align: center;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 0.5em;
+      margin-top: 0.5em;
+    }
+    .button-container button {
+      height: 2.5em;
+      padding: 0 1em;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .feedback-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5em;
+    }
+    #result {
+      font-size: 1.2rem;
+      font-weight: bold;
+      min-height: 1.5em;
+    }
+    #result.correct { color: green; }
+    #result.incorrect { color: red; }
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      font-size: 1rem;
+    }
+    .back-button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      font-size: 1rem;
+      cursor: pointer;
+      border: 1px solid #888;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+      text-decoration: none;
+      color: #000;
+      display: inline-block;
+    }
+    .back-button:hover { background-color: #e0e0e0; }
+    .rules-frame {
+      width: 600px;
+      max-width: 95%;
+    }
+    #toggle-rules {
+      margin-top: 0.5em;
+      padding: 0.5em 1em;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #rules {
+      margin-top: 1em;
+      display: none;
+    }
+    #rules table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    #rules td {
+      border: 1px solid #999;
+      padding: 0.5em;
+      text-align: left;
+    }
+    .instruction {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5em;
+      max-width: 550px;
+      text-align: center;
+    }
+  </style>
+  <script id="words-data" type="application/json">{{ words|tojson }}</script>
+</head>
+<body>
+  <p class="instruction">
+    Wählen Sie den korrekten Artikel.<br> 
+    Das nächste Wort kommt automatisch.
+  </p>
+  <!-- Quiz Section -->
+  <div class="frame quiz-section">
+    <div class="button-container">
+      <button onclick="answer('der')">der</button>
+      <button onclick="answer('die')">die</button>
+      <button onclick="answer('das')">das</button>
+    </div>
+    <div id="noun"></div>
+  </div>
+
+  <!-- Feedback Section -->
+  <div class="frame feedback-section">
+    <div id="result"></div>
+    <div class="stats">
+      <div>Richtig: <span id="correct">0</span></div>
+      <div>Versuche: <span id="total">0</span></div>
+      <div>Quote: <span id="percent">0%</span></div>
+    </div>
+    <a href="{{ url_for('home') }}" class="back-button">Zurück zum Menü</a>
+  </div>
+
+  <!-- Rules Frame -->
+  <div class="frame rules-frame">
+    <button id="toggle-rules">Zeig mir die Regeln</button>
+    <div id="rules">
+      <table>
+        <tr><td>der</td><td>-ismus, -ist, -or, Berufe, Tageszeiten, Wochentage, Monate</td></tr>
+        <tr><td>die</td><td>-ung, -heit, -keit, -schaft, -ion, -tät, -nz, -ik, -ei, -e</td></tr>
+        <tr><td>das</td><td>-chen, -ment, -um, -nis, -ma, Substantivierung</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const words = JSON.parse(document.getElementById('words-data').textContent);
+    let idx = 0, correct = 0, total = 0;
+    function showWord() {
+      idx = Math.floor(Math.random() * words.length);
+      document.getElementById('noun').textContent = words[idx].noun;
+      document.getElementById('result').textContent = '';
+      document.getElementById('result').className = '';
+    }
+    function answer(choice) {
+      total++;
+      const isRight = choice === words[idx].article;
+      const res = document.getElementById('result');
+      res.textContent = isRight ? 'RICHTIG' : 'FALSCH';
+      res.className = isRight ? 'correct' : 'incorrect';
+      if (isRight) correct++;
+      document.getElementById('correct').textContent = correct;
+      document.getElementById('total').textContent = total;
+      document.getElementById('percent').textContent = Math.round(correct/total*100) + '%';
+      idx++;
+      setTimeout(showWord, 1000);
+    }
+    window.onload = () => {
+      document.getElementById('rules').style.display = 'none';
+      showWord();
+    };
+    document.getElementById('toggle-rules').onclick = () => {
+      const rules = document.getElementById('rules');
+      const btn = document.getElementById('toggle-rules');
+      if (rules.style.display === 'none') {
+        rules.style.display = 'block';
+        btn.textContent = 'Versteck die Regeln';
+      } else {
+        rules.style.display = 'none';
+        btn.textContent = 'Zeig mir die Regeln';
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Rechner für Lerndauer</title>
+  <style>
+    body {
+      padding-top: 2em;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .frame {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 1em;
+      margin: 1em 0;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      width: 550px;
+      max-width: 90%;
+      text-align: center;
+    }
+    .frame h1 {
+      font-size: 1rem;
+      font-weight: normal; /* remove bold */
+      margin-bottom: 0.5em;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+      margin-bottom: 1em;
+      align-items: center;
+    }
+    .input-group label {
+      font-size: 1rem;
+      font-weight: normal;
+    }
+    .input-group input {
+      width: 4em;
+      padding: 0.2em;
+      font-size: 1rem;
+      margin: 0 auto;
+    }
+    button#calculate {
+      font-size: 1rem;
+      padding: 0.5em 1em;
+      cursor: pointer;
+      font-weight: normal;
+    }
+    .result {
+      font-size: 1.1rem;
+      margin-top: 0.5em;
+      font-weight: normal; /* remove bold */
+    }
+    .back-button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      font-size: 1rem;
+      border: 1px solid #888;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+      text-decoration: none;
+      color: #000;
+      display: inline-block;
+      font-weight: normal;
+    }
+    .back-button:hover {
+      background-color: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <h1>
+      Laut Goethe-Institut benötigt ein Lerner circa 75 volle Stunden, um das Sprachniveau A1 komplett zu lernen. 
+      Für das Sprachniveau A2 sind es ebenso 75 volle Stunden. 
+      Berechnen Sie hier, wie lange Sie mit ihrem Lerntempo brauchen, um das Level A1 bzw. A2 komplett zu lernen.<br>
+    </h1>
+    <div class="input-group">
+      <label for="unterricht">Volle Stunden Unterricht pro Woche</label>
+      <input type="number" id="unterricht" lang="en" min="0" step="0.5" value="0.0">
+      <label for="solo">Volle Stunden Solo-Lernen pro Woche</label>
+      <input type="number" id="solo" lang="en" min="0" step="0.5" value="0.0">
+      <label for="konversation">Volle Stunden zusätzliche Konversation pro Woche</label>
+      <input type="number" id="konversation" lang="en" min="0" step="0.5" value="0.0">
+    </div>
+    <button id="calculate">Lerndauer berechnen</button>
+  </div>
+
+  <div class="frame">
+    <div class="result" id="output"></div>
+    <a href="{{ url_for('home') }}" class="back-button">Zurück zum Menü</a>
+  </div>
+
+  <script>
+    document.getElementById('calculate').addEventListener('click', function() {
+      const u = parseFloat(document.getElementById('unterricht').valueAsNumber) || 0;
+      const s = parseFloat(document.getElementById('solo').valueAsNumber) || 0;
+      const k = parseFloat(document.getElementById('konversation').valueAsNumber) || 0;
+      const T = u + s + k;
+      if (T <= 0) {
+        document.getElementById('output').textContent = 'Bitte geben Sie mindestens 1 Stunde insgesamt ein.';
+        return;
+      }
+      const W = 75 / T;
+      const M = 0.23 * 75 / T;
+      document.getElementById('output').innerHTML =
+        `Mit diesem Lerntempo brauchen Sie circa ${W.toFixed(0)} Wochen oder <br> ${M.toFixed(1)} Monate, um ein Sprachniveau komplett zu lernen.`;
+    });
+  </script>
+</body>
+</html>

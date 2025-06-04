@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Verbkonjugation II</title>
+  <style>
+    body {
+      padding-top: 2em;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .frame {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 1em;
+      margin: 1em 0;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      width: 550px;
+      max-width: 90%;
+      text-align: center;
+    }
+    .quiz-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1em; /* restored original gap */
+      text-align: center;
+    }
+    .instruction {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5em;
+      max-width: 550px;
+      text-align: center;
+    }
+    #toggle-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5em;
+      width: 550px;
+      max-width: 90%;
+    }
+    #toggle-warning {
+      margin-right: 0.5em;
+    }
+    #warning {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 0.5em;
+      margin-bottom: 0;
+      display: none;
+    }
+    #prompt {
+      font-size: 1.5rem;
+      font-weight: normal;
+      margin: 0;
+    }
+    .input-container {
+      display: flex;
+      gap: 0.5em;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+    .input-container label {
+      width: 100px;
+      text-align: right;
+    }
+    .input-container input {
+      /* statt flex:1 */
+      flex: none;
+      /* feste Breite, hier 120px, passe nach Wunsch an */
+      width: 160px;
+      height: 1.5em;
+      padding: 0 0.5em;
+      font-size: 1rem;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      margin-top: 0.5em;
+    }
+    button {
+      height: 2.5em;
+      padding: 0 1em;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .feedback-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5em;
+    }
+    #result {
+      font-size: 1.2rem;
+      font-weight: normal;
+      min-height: 1.5em;
+    }
+    #result.correct { color: green; }
+    #result.incorrect { color: red; }
+    .solution { color: green; font-weight: normal; }
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      font-size: 1rem;
+    }
+    .back-button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      font-size: 1rem;
+      border: 1px solid #888;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+      text-decoration: none;
+      color: #000;
+    }
+    .back-button:hover { background-color: #e0e0e0; }
+  </style>
+  <script id="pairs-data" type="application/json">{{ pairs|tojson }}</script>
+</head>
+<body>
+  <p class="instruction">
+    Konjungieren Sie das Verb.<br>
+    Diese Verben sind nicht regelmäßig.<br>
+    Sie können Enter für OK und Weiter nutzen.
+  </p>
+  <div id="toggle-container">
+    <input type="checkbox" id="toggle-warning">
+    <label for="toggle-warning">Zeige Tipp</label>
+  </div>
+  <div class="frame quiz-section">
+    <div id="prompt"></div>
+    <div class="input-container">
+      <label for="guess1">ich</label>
+      <input id="guess1" autocomplete="off">
+    </div>
+    <div class="input-container">
+      <label for="guess2">du</label>
+      <input id="guess2" autocomplete="off">
+    </div>
+    <div class="input-container">
+      <label for="guess3">er/sie/es</label>
+      <input id="guess3" autocomplete="off">
+    </div>
+    <div class="input-container">
+      <label for="guess4">wir</label>
+      <input id="guess4" autocomplete="off">
+    </div>
+    <div class="input-container">
+      <label for="guess5">ihr</label>
+      <input id="guess5" autocomplete="off">
+    </div>
+    <div class="input-container">
+      <label for="guess6">sie/Sie</label>
+      <input id="guess6" autocomplete="off">
+    </div>
+    <div class="button-container">
+      <button id="submit">OK</button>
+      <button id="continue" disabled>Weiter</button>
+    </div>
+    <div id="warning"></div>
+  </div>
+  <div class="frame feedback-section">
+    <div id="result"></div>
+    <div class="stats">
+      <div>Richtig: <span id="correct">0</span></div>
+      <div>Versuche: <span id="total">0</span></div>
+      <div>Quote: <span id="percent">0%</span></div>
+    </div>
+    <a href="{{ url_for('home') }}" class="back-button">Zurück zum Menü</a>
+  </div>
+  <script>
+    const pairs = JSON.parse(document.getElementById('pairs-data').textContent);
+    let correct = 0, total = 0, current = null;
+    const promptEl = document.getElementById('prompt');
+    const warningEl = document.getElementById('warning');
+    const toggle = document.getElementById('toggle-warning');
+    const inputs = [
+      document.getElementById('guess1'),
+      document.getElementById('guess2'),
+      document.getElementById('guess3'),
+      document.getElementById('guess4'),
+      document.getElementById('guess5'),
+      document.getElementById('guess6')
+    ];
+    const submitBtn = document.getElementById('submit');
+    const continueBtn = document.getElementById('continue');
+    const resultEl = document.getElementById('result');
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        // if the OK‐button is active, click it
+        if (!submitBtn.disabled) {
+          submitBtn.click();
+          e.preventDefault();
+        }
+        // otherwise if Weiter is active, click that
+        else if (!continueBtn.disabled) {
+          continueBtn.click();
+          e.preventDefault();
+        }
+      }
+    });
+
+    function nextPair() {
+      current = pairs[Math.floor(Math.random() * pairs.length)];
+      promptEl.textContent = current.basic;
+      warningEl.textContent = current.warning;
+      inputs.forEach(i => { i.value = ''; i.disabled = false; });
+      submitBtn.disabled = false;
+      continueBtn.disabled = true;
+      resultEl.textContent = '';
+      resultEl.className = '';
+      document.getElementById('guess1').focus();
+      // hide warning initially
+      warningEl.style.display = toggle.checked ? 'block' : 'none';
+    }
+
+    toggle.onchange = () => {
+      warningEl.style.display = toggle.checked ? 'block' : 'none';
+    };
+
+    submitBtn.onclick = () => {
+      total++;
+      const user = inputs.map(i => i.value.trim().toLowerCase());
+      const right = [
+        current.ich.toLowerCase(),
+        current.du.toLowerCase(),
+        current.er.toLowerCase(),
+        current.wir.toLowerCase(),
+        current.ihr.toLowerCase(),
+        current.sie.toLowerCase()
+      ];
+      const allCorrect = right.every((r, i) => r === user[i]);
+      if (allCorrect) {
+        resultEl.textContent = 'RICHTIG';
+        resultEl.className = 'correct';
+        correct++;
+      } else {
+        resultEl.innerHTML = 'FALSCH <span class="solution">(RICHTIG: ' +
+          [current.ich, current.du, current.er, current.wir, current.ihr, current.sie].join(', ') +
+          ')</span>';
+        resultEl.className = 'incorrect';
+      }
+      document.getElementById('correct').textContent = correct;
+      document.getElementById('total').textContent = total;
+      document.getElementById('percent').textContent = Math.round(correct/total*100) + '%';
+      inputs.forEach(i => i.disabled = true);
+      submitBtn.disabled = true;
+      continueBtn.disabled = false;
+    };
+
+    continueBtn.onclick = nextPair;
+    window.onload = nextPair;
+  </script>
+</body>
+</html>

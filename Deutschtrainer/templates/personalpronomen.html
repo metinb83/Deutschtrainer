@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Personalpronomen 3. Person Singular</title>
+  <style>
+    body {
+      padding-top: 2em;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .frame {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 1em;
+      margin: 1em 0;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      width: 550px;
+      max-width: 90%;
+      text-align: center;
+    }
+    .quiz-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1em;
+    }
+    #prompt div:first-child {
+      font-size: 1.33rem;
+      font-weight: normal;
+      margin-bottom: 0.25em;
+    }
+    #prompt div:last-child {
+      font-size: 1.33rem;
+      font-weight: normal;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 0.5em;
+      margin-top: 0.5em;
+    }
+    .button-container button {
+      height: 2.5em;
+      padding: 0 1em;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .button-container button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .feedback-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5em;
+    }
+    #result {
+      font-size: 1.2rem;
+      font-weight: bold;
+      min-height: 1.5em;
+    }
+    #result.correct { color: green; }
+    #result.incorrect { color: red; }
+    .solution { color: green; font-weight: bold; }
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      font-size: 1rem;
+    }
+    .back-button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      font-size: 1rem;
+      cursor: pointer;
+      border: 1px solid #888;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+      text-decoration: none;
+      color: #000;
+      display: inline-block;
+    }
+    .back-button:hover {
+      background-color: #e0e0e0;
+    }
+    .instruction {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5em;
+      max-width: 550px;
+      text-align: center;
+    }
+  </style>
+  <script id="pairs-data" type="application/json">{{ pairs|tojson }}</script>
+</head>
+<body>
+  <p class="instruction">
+    Wählen Sie das korrekte Pronomen.
+  </p>
+  <!-- Quiz Section -->
+  <div class="frame quiz-section">
+    <div id="prompt"></div>
+    <div class="button-container">
+      <button id="option1">Option 1</button>
+      <button id="option2">Option 2</button>
+      <button id="continue" disabled>Weiter</button>
+    </div>
+  </div>
+  <!-- Feedback Section -->
+  <div class="frame feedback-section">
+    <div id="result"></div>
+    <div class="stats">
+      <div>Richtig: <span id="correct">0</span></div>
+      <div>Versuche: <span id="total">0</span></div>
+      <div>Quote: <span id="percent">0%</span></div>
+    </div>
+    <a href="{{ url_for('home') }}" class="back-button">Zurück zum Menü</a>
+  </div>
+  <script>
+    const pairs = JSON.parse(document.getElementById('pairs-data').textContent);
+    const maleSet = ["Mann","Plan","Weg","Peter","Markus","Ali"];
+    const neuterSet = ["Kind","Auto","Schild"];
+    const femaleSet = ["Frau","Straße","Karte","Maria","Anna","Lisa"];
+    let correct = 0, total = 0, current = {};
+    const promptEl = document.getElementById('prompt');
+    const opt1Btn = document.getElementById('option1');
+    const opt2Btn = document.getElementById('option2');
+    const continueBtn = document.getElementById('continue');
+    const resultEl = document.getElementById('result');
+    const correctEl = document.getElementById('correct');
+    const totalEl = document.getElementById('total');
+    const percentEl = document.getElementById('percent');
+
+    function nextPronoun() {
+      const idx = Math.floor(Math.random() * pairs.length);
+      current = pairs[idx];
+      const cont = current.continuation;
+      let opts;
+      if (maleSet.some(w => cont.includes(w))) {
+        opts = ["ihn","ihm"];
+      } else if (neuterSet.some(w => cont.includes(w))) {
+        opts = ["es","ihm"];
+      } else {
+        opts = ["sie","ihr"];
+      }
+      // Fixed order: opts[0] left, opts[1] right
+      opt1Btn.textContent = opts[0];
+      opt2Btn.textContent = opts[1];
+      // Display phrase and continuation
+      promptEl.innerHTML = `<div>${current.phrase} ${current.continuation}.</div><div>${current.phrase} ...</div>`;
+      opt1Btn.disabled = false;
+      opt2Btn.disabled = false;
+      continueBtn.disabled = true;
+      resultEl.textContent = "";
+      resultEl.className = "";
+    }
+
+    function handleAnswer(choice) {
+      total++;
+      const isRight = (choice === current.pronoun);
+      if (isRight) {
+        resultEl.textContent = "RICHTIG";
+        resultEl.className = "correct";
+        correct++;
+      } else {
+        resultEl.innerHTML = 'FALSCH <span class="solution">(RICHTIG: ' + current.pronoun + ')</span>';
+        resultEl.className = "incorrect";
+      }
+      correctEl.textContent = correct;
+      totalEl.textContent = total;
+      percentEl.textContent = Math.round((correct/total)*100) + "%";
+      opt1Btn.disabled = true;
+      opt2Btn.disabled = true;
+      continueBtn.disabled = false;
+    }
+
+    opt1Btn.onclick = () => handleAnswer(opt1Btn.textContent);
+    opt2Btn.onclick = () => handleAnswer(opt2Btn.textContent);
+    continueBtn.onclick = nextPronoun;
+
+    window.onload = nextPronoun;
+  </script>
+</body>
+</html>

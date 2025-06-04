@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Modalverben</title>
+  <style>
+    body {
+      padding-top: 2em;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .frame {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 1em;
+      margin: 1em 0;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      width: 550px;
+      max-width: 90%;
+      text-align: center;
+    }
+    .quiz-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1em; /* increased gap for equal spacing */
+    }
+    #prompt {
+      font-size: 1.33rem;
+      text-align: center;
+      line-height: 1.4;
+    }
+    #basic-form {
+      font-size: 1rem;
+      font-style: italic;
+      color: #555;
+      margin: 0.25em 0; /* equal space above and below */
+    }
+    .input-container {
+      display: flex;
+      gap: 0.5em;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+    input#guess {
+      flex: 1;
+      height: 2.5em;
+      padding: 0 0.5em;
+      font-size: 1rem;
+    }
+    button#submit, button#continue {
+      height: 2.5em;
+      padding: 0 1em;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button#continue:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .feedback-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5em;
+    }
+    #result {
+      font-size: 1.2rem;
+      font-weight: bold;
+      min-height: 1.5em;
+    }
+    #result.correct { color: green; }
+    #result.incorrect { color: red; }
+    .solution { color: green; font-weight: bold; }
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      font-size: 1rem;
+    }
+    .back-button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      font-size: 1rem;
+      cursor: pointer;
+      border: 1px solid #888;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+      text-decoration: none;
+      color: #000;
+      display: inline-block;
+    }
+    .back-button:hover { background-color: #e0e0e0; }
+    .instruction {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5em;
+      max-width: 550px;
+      text-align: center;
+    }
+  </style>
+  <script id="pairs-data" type="application/json">{{ pairs|tojson }}</script>
+</head>
+<body>
+  <p class="instruction">
+    Geben Sie die korrekte Form des Modalverbs ein.<br>
+    Sie können Enter für OK und Weiter nutzen.
+  </p>
+  <div class="frame quiz-section">
+    <div id="prompt"></div>
+    <div id="basic-form"></div>
+    <div class="input-container">
+      <input type="text" id="guess" placeholder="Modalverb eingeben" autocomplete="off" />
+      <button id="submit">OK</button>
+      <button id="continue" disabled>Weiter</button>
+    </div>
+  </div>
+  <div class="frame feedback-section">
+    <div id="result"></div>
+    <div class="stats">
+      <div>Richtig: <span id="correct">0</span></div>
+      <div>Versuche: <span id="total">0</span></div>
+      <div>Quote: <span id="percent">0%</span></div>
+    </div>
+    <a href="{{ url_for('home') }}" class="back-button">Zurück zum Menü</a>
+  </div>
+  <script>
+    const pairs = JSON.parse(document.getElementById('pairs-data').textContent);
+    let correct = 0, total = 0, current = null;
+    const promptEl = document.getElementById('prompt');
+    const basicEl = document.getElementById('basic-form');
+    const guessInput = document.getElementById('guess');
+    const submitBtn = document.getElementById('submit');
+    const continueBtn = document.getElementById('continue');
+    const resultEl = document.getElementById('result');
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        // if the OK‐button is active, click it
+        if (!submitBtn.disabled) {
+          submitBtn.click();
+          e.preventDefault();
+        }
+        // otherwise if Weiter is active, click that
+        else if (!continueBtn.disabled) {
+          continueBtn.click();
+          e.preventDefault();
+        }
+      }
+    });
+
+    function getBasicForm(verb) {
+      const v = verb.toLowerCase();
+      const koennen = ['kann', 'kannst', 'können', 'könnt', 'könne'];
+      const muessen = ['muss', 'musst', 'müssen', 'müsst', 'müsse'];
+      const duerfen = ['darf', 'darfst', 'dürfen', 'dürft', 'dürfe'];
+      if (koennen.includes(v)) return 'können';
+      if (muessen.includes(v)) return 'müssen';
+      if (duerfen.includes(v)) return 'dürfen';
+      return verb;
+    }
+
+    function nextPair() {
+      const idx = Math.floor(Math.random() * pairs.length);
+      current = pairs[idx];
+
+      // Split at first period so second sentence starts new line
+      const i = current.prefix.indexOf('.');
+      const firstSent = current.prefix.slice(0, i + 1);
+      const secondStart = current.prefix.slice(i + 2);
+      promptEl.innerHTML = firstSent + '<br>' + secondStart + ' _____ ' + current.suffix;
+      basicEl.textContent = '(' + getBasicForm(current.verb) + ')';
+
+      guessInput.value = '';
+      guessInput.disabled = false;
+      submitBtn.disabled = false;
+      continueBtn.disabled = true;
+      resultEl.textContent = '';
+      resultEl.className = '';
+      document.getElementById('guess').focus();
+    }
+
+    submitBtn.onclick = () => {
+      total++;
+      const user = guessInput.value.trim().toLowerCase();
+      const isRight = user === current.verb.toLowerCase();
+      if (isRight) {
+        resultEl.textContent = 'RICHTIG';
+        resultEl.className = 'correct';
+        correct++;
+      } else {
+        resultEl.innerHTML = 'FALSCH <span class="solution">(RICHTIG: ' + current.verb + ')</span>';
+        resultEl.className = 'incorrect';
+      }
+      document.getElementById('correct').textContent = correct;
+      document.getElementById('total').textContent = total;
+      document.getElementById('percent').textContent = Math.round((correct/total)*100) + '%';
+      guessInput.disabled = true;
+      submitBtn.disabled = true;
+      continueBtn.disabled = false;
+    };
+
+    continueBtn.onclick = nextPair;
+    window.onload = nextPair;
+  </script>
+</body>
+</html>
