@@ -131,9 +131,13 @@
     const percentEl = document.getElementById('percent');
     const promptEl = document.getElementById('prompt');
     let correct = 0, total = 0, current = null;
+    let lastIdx = -1;
 
     function nextQuestion() {
-      current = pairs[Math.floor(Math.random() * pairs.length)];
+      let idx;
+      do { idx = Math.floor(Math.random() * pairs.length); } while (idx == lastIdx && pairs.length > 1);
+      lastIdx = idx;
+      current = pairs[idx];
       const phrase = current.phrase;
       const idx = phrase.indexOf('?');
       const first = phrase.slice(0, idx+1);

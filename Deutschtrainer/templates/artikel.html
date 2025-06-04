@@ -150,8 +150,10 @@
   <script>
     const words = JSON.parse(document.getElementById('words-data').textContent);
     let idx = 0, correct = 0, total = 0;
+    let lastIdx = -1;
     function showWord() {
-      idx = Math.floor(Math.random() * words.length);
+      do { idx = Math.floor(Math.random() * words.length); } while (idx == lastIdx && words.length > 1);
+      lastIdx = idx;
       document.getElementById('noun').textContent = words[idx].noun;
       document.getElementById('result').textContent = '';
       document.getElementById('result').className = '';

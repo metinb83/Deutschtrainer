@@ -123,6 +123,7 @@
   <script>
     const pairs = JSON.parse(document.getElementById('pairs-data').textContent);
     let correct = 0, total = 0, current = null;
+    let lastIdx = -1;
     const hintEl = document.getElementById('hint');
     const promptEl = document.getElementById('prompt');
     const submitBtn = document.getElementById('submit');
@@ -144,7 +145,10 @@
     });
 
     function nextPair() {
-      current = pairs[Math.floor(Math.random() * pairs.length)];
+      let idx;
+      do { idx = Math.floor(Math.random() * pairs.length); } while (idx == lastIdx && pairs.length > 1);
+      lastIdx = idx;
+      current = pairs[idx];
       hintEl.textContent = `(${current.infinitive})`;
       promptEl.innerHTML = `${current.part2} <input id="input1" autocomplete="off" /> ${current.part4} <input id="input2" autocomplete="off" />&nbsp;${current.punct}`;
       submitBtn.disabled = false;
