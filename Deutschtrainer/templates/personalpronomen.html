@@ -126,6 +126,7 @@
     const neuterSet = ["Kind","Auto","Schild"];
     const femaleSet = ["Frau","Straße","Karte","Maria","Anna","Lisa"];
     let correct = 0, total = 0, current = {};
+    let lastIdx = -1;
     const promptEl = document.getElementById('prompt');
     const opt1Btn = document.getElementById('option1');
     const opt2Btn = document.getElementById('option2');
@@ -136,7 +137,9 @@
     const percentEl = document.getElementById('percent');
 
     function nextPronoun() {
-      const idx = Math.floor(Math.random() * pairs.length);
+      let idx;
+      do { idx = Math.floor(Math.random() * pairs.length); } while (idx == lastIdx && pairs.length > 1);
+      lastIdx = idx;
       current = pairs[idx];
       const cont = current.continuation;
       let opts;

@@ -123,6 +123,7 @@
   <script>
     const pairs = JSON.parse(document.getElementById('pairs-data').textContent);
     let current = {};
+    let lastIdx = -1;
 
     const promptEl = document.getElementById('prompt');
     const translationEl = document.getElementById('translation');
@@ -148,7 +149,9 @@
 
     // Zufälliges Wort-Paar laden
     function nextPair() {
-      const idx = Math.floor(Math.random() * pairs.length);
+      let idx;
+      do { idx = Math.floor(Math.random() * pairs.length); } while (idx == lastIdx && pairs.length > 1);
+      lastIdx = idx;
       current = pairs[idx];
       updatePrompt();
     }

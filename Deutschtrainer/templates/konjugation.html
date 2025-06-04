@@ -166,6 +166,7 @@
   <script>
     const pairs = JSON.parse(document.getElementById('pairs-data').textContent);
     let correct = 0, total = 0, current = null;
+    let lastIdx = -1;
     const promptEl = document.getElementById('prompt');
     const warningEl = document.getElementById('warning');
     const inputs = [
@@ -195,7 +196,10 @@
     });
 
     function nextPair() {
-      current = pairs[Math.floor(Math.random() * pairs.length)];
+      let idx;
+      do { idx = Math.floor(Math.random() * pairs.length); } while (idx == lastIdx && pairs.length > 1);
+      lastIdx = idx;
+      current = pairs[idx];
       promptEl.textContent = current.basic;
       const b = current.basic;
       if (/(ten|den)$/.test(b)) warningEl.textContent = 'Achtung: Endung -ten / -den';

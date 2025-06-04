@@ -124,6 +124,7 @@
     // exact same script as in modal.html
     const pairs = JSON.parse(document.getElementById('pairs-data').textContent);
     let correct = 0, total = 0, current = null;
+    let lastIdx = -1;
     const promptEl = document.getElementById('prompt');
     const basicEl  = document.getElementById('basic-form');
     const guessInput = document.getElementById('guess');
@@ -144,7 +145,9 @@
     });
 
     function nextPair() {
-      const idx = Math.floor(Math.random() * pairs.length);
+      let idx;
+      do { idx = Math.floor(Math.random() * pairs.length); } while (idx == lastIdx && pairs.length > 1);
+      lastIdx = idx;
       current = pairs[idx];
 
       // handle line breaks if there’s a period

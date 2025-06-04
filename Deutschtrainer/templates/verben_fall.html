@@ -141,6 +141,7 @@
     ];
     const showDieGeschichte = ['Ich erzähle'];
     let correct = 0, total = 0, current = {};
+    let lastIdx = -1;
     const promptEl = document.getElementById('prompt');
     const opt1Btn = document.getElementById('option1');
     const opt2Btn = document.getElementById('option2');
@@ -152,7 +153,9 @@
     const extraEl = document.getElementById('extra-object');
 
     function nextCase() {
-      const idx = Math.floor(Math.random() * casePairs.length);
+      let idx;
+      do { idx = Math.floor(Math.random() * casePairs.length); } while (idx == lastIdx && casePairs.length > 1);
+      lastIdx = idx;
       current = casePairs[idx];
       const phraseKey = current.phrase.replace(/\.$/, '');
       // Filter options
